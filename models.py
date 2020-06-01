@@ -4,7 +4,7 @@ from torch.nn import functional as F
 
 class ResNet34(nn.Module):
     def __init__(self, pretrained):
-        super(ResNet34, self).__init__()
+        super().__init__()
 
         if pretrained is True:
             self.model = pretrainedmodels.__dict__["resnet34"](pretrained="imagenet")

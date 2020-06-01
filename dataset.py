@@ -4,14 +4,14 @@ import numpy as np
 from PIL import Image
 import joblib
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 
-class BengaliTrainDataset(DataLoader):
-    def __init__(self, folds, transforms = None):
+class BengaliTrainDataset(Dataset):
+    def __init__(self, dataframe, folds, transforms = None):
         super().__init__()
 
-        df = pd.read_csv("../input/train_folds.csv")
-        df = df[["image_id", "grapheme_root", "vowel_diacritic", "consonant_diacritic", "kfold"]]
+        self.df = dataframe[dataframe.kfold.isin(folds)].reset_index(drop = True)
+        df = dataframe[["image_id", "grapheme_root", "vowel_diacritic", "consonant_diacritic", "kfold"]]
         self.transforms = transforms
 
         df = df[df.kfold.isin(folds)].reset_index(drop = True)
@@ -21,10 +21,11 @@ class BengaliTrainDataset(DataLoader):
         self.consonant_diacritic = df.consonant_diacritic.values
 
     def __getitem__(self, index: int):
-        image = joblib.load(f"../input/image_pickles/{self.image_ids[index]}.pkl")
+        image = joblib.load(f"input/image_pickles/{self.image_ids[index]}.pkl")
         image = image.reshape(137,236).astype(float)
         image = Image.fromarray(image).convert("RGB")
         image = np.array(image)
+        
 
         if self.transforms:
             sample = {
